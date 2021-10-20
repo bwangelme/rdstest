@@ -17,53 +17,60 @@ import (
 
 var (
 	client    *redis.Client
-	workerCnt = 1
+	workerCnt = 2
 )
 
-func initLog() {
-	logname := time.Now().Format("2006-01-02-03_04_05.log")
-	file, _ := os.OpenFile(filepath.Join("logs", logname), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	mw := io.MultiWriter(os.Stdout, file)
-	logrus.SetOutput(mw)
+func getWorkerLogger(id int) *logrus.Logger {
+	logger := logrus.New()
 
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetLevel(logrus.DebugLevel)
+	logName := time.Now().Format("2006-01-02-03_04_05.log")
+	logName = fmt.Sprintf("worker-%v-%v", id, logName)
+	file, _ := os.OpenFile(filepath.Join("logs", logName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	mw := io.MultiWriter(os.Stdout, file)
+
+	logger.SetOutput(mw)
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger.SetLevel(logrus.DebugLevel)
+
+	return logger
 }
 
 func init() {
 	client = redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
-	initLog()
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 }
 
-func setNow(id int) {
+func setNow(logger *logrus.Logger, id int) {
 	key := fmt.Sprintf("key_data/%v", id)
 	now := time.Now().UnixNano()
 	_, err := client.Set(context.Background(), key, now, 0).Result()
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		logger.WithFields(logrus.Fields{
 			"key": key,
 			"err": err,
 			"id":  id,
 		}).Info()
 	}
+	logger.Infof("Update %v", key)
 }
 
 func worker(id int, wg *sync.WaitGroup, stop chan struct{}) {
+	logger := getWorkerLogger(id)
 	tick := time.NewTicker(time.Millisecond * 1000)
 OUT:
 	for {
 		select {
 		case <-tick.C:
-			setNow(id)
+			setNow(logger, id)
 		case <-stop:
 			wg.Done()
 			break OUT
 		}
 	}
 	tick.Stop()
-	logrus.Infof("Stop worker %v\n", id)
+	logger.Infof("Stop worker %v\n", id)
 }
 
 func main() {
