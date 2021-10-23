@@ -1,2 +1,2 @@
-redis/run/
+redis/run_*/
 logs/
