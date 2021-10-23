@@ -37,14 +37,16 @@ func getWorkerLogger(id int) *logrus.Logger {
 
 func init() {
 	client = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr:     "localhost:6379",
+		Password: "aKr84vEm5Ekd",
 	})
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 }
 
 func setNow(logger *logrus.Logger, id int) {
-	key := fmt.Sprintf("key_data/%v", id)
-	now := time.Now().UnixNano()
+	now := time.Now()
+	nowStr := now.Format("2006-01-02-03-04-05")
+	key := fmt.Sprintf("key_data/%v/%v", id, nowStr)
 	_, err := client.Set(context.Background(), key, now, 0).Result()
 	if err != nil {
 		logger.WithFields(logrus.Fields{
@@ -58,7 +60,7 @@ func setNow(logger *logrus.Logger, id int) {
 
 func worker(id int, wg *sync.WaitGroup, stop chan struct{}) {
 	logger := getWorkerLogger(id)
-	tick := time.NewTicker(time.Millisecond * 1000)
+	tick := time.NewTicker(time.Millisecond * 100)
 OUT:
 	for {
 		select {

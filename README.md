@@ -17,7 +17,7 @@ redis server
 + 开启 rdb 和 aof ，启动redis
 
 ```
-redis-server redis/redis.conf
+redis-server redis/redis_6379.conf
 ```
 
 + 向 Redis 写入一个独立的 key
@@ -31,5 +31,5 @@ go run bench.go
 1. 关闭 redis server
 1. 关闭 aof，复制 rdb 文件 ，启动 redis
 1. 查看备份是否恢复成功
-1. 热更新配置，开启 aof
+1. 热更新配置，开启 aof `CONFIG SET appendonly yes`
 1. 开启 aof 配置，重启 redis
