@@ -1097,8 +1097,8 @@ redis-benchmark -h localhost -a aKr84vEm5Ekd  38.91s user 16.67s system 98% cpu 
 
 ## Redis 的高并发与高可用
 
-高并发: Redis 主从架构的集群，通过配置读写分离，可以支持上百万的读QPS。
-高可用：Redis 通过配置 Sentinel(哨兵)，可以在 Master 挂掉之后及时切换主备，让集群的故障时间尽可能短。
++ 高并发: Redis 主从架构的集群，通过配置读写分离，可以支持上百万的读QPS。
++ 高可用：Redis 通过配置 Sentinel(哨兵)，可以在 Master 挂掉之后及时切换主备，让集群的故障时间尽可能短。
 
 ## 解决异步复制和脑裂导致的数据丢失
 
