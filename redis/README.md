@@ -3,8 +3,8 @@
 + 启动 redis
 
 ```shell
-redis-server redis_6379.conf
-redis-server redis_6380.conf
+make m
+make s
 ```
 
 ## 配置说明
